@@ -1,0 +1,29 @@
+inputs:
+pathToPublish: '$(Build.ArtifactStagingDirectory)'
+artifactName: 'HTMLBuildArtifacts'
+
+task: CmdLine@2
+inputs:
+script: |
+echo "Running HTML build and tests..."
+echo "Installing dependencies..."
+apt-get update
+apt-get install -y nodejs
+apt-get install -y npm
+npm install
+echo "Building HTML project..."
+npm run build
+echo "Running tests..."
+npm test
+
+task: CopyFiles@2
+inputs:
+sourceFolder: '$(build.sourcesDirectory)/dist'
+targetFolder: '$(Build.ArtifactStagingDirectory)/dist'
+
+task: AzureWebApp@1
+inputs:
+appType: 'webApp'
+appName: 'HTMLApp'
+package: '$(Build.ArtifactStagingDirectory)/dist'
+deploymentMethod: 'runFromZip'
